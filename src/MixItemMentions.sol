@@ -16,7 +16,7 @@ contract MixItemMentions {
     mapping (address => bytes32[]) accountMentionItemIds;
 
     /**
-     * @dev An item has been added to an account
+     * @dev An item has mentioned an account
      * @param account Address of the account being mentioned.
      * @param itemId itemId of the item mentioning the account.
      * @param i Index of the new item.
@@ -34,16 +34,16 @@ contract MixItemMentions {
     }
 
     /**
-     * @dev Add an item to a topic. The item must not exist yet.
+     * @dev Add an item to the list of items that mention an account. The item must not exist yet.
      * @param account Account to mention.
      * @param itemStore The ItemStore contract that will contain the item.
      * @param nonce The nonce that will be used to create the item.
      */
-    function addItem(address account, MixItemStoreInterface itemStore, bytes32 nonce) external{
+    function addItem(address account, MixItemStoreInterface itemStore, bytes32 nonce) external {
         // Get the itemId. Ensure it does not exist.
         bytes32 itemId = itemStore.getNewItemId(msg.sender, nonce);
         // Ensure the item does not have too many mentions.
-        require (itemIdMentionAccounts[itemId].length < 20, "Item cannot have more than 20 mentions.");
+        require (itemIdMentionAccounts[itemId].length < 20, "Item cannot mention more than 20 accounts.");
         // Store mappings.
         accountMentionItemIds[account].push(itemId);
         itemIdMentionAccounts[itemId].push(account);
@@ -61,33 +61,33 @@ contract MixItemMentions {
     }
 
     /**
-     * @dev Get a specific topic item.
+     * @dev Get a specific account mention.
      * @param account Address of the account.
      * @param i Index of the item.
-     * @return itemId itemId of the topic item.
+     * @return itemId itemId of the mentioning item.
      */
     function getMentionItem(address account, uint i) external view accountMentionExists(account, i) returns (bytes32) {
         return accountMentionItemIds[account][i];
     }
 
     /**
-     * @dev Get the all of a topic's itemIds.
+     * @dev Get the all of an accounts mentions.
      * @param account Address of the account.
-     * @return The itemIds.
+     * @return Array of itemIds of items that have mentioned this account.
      */
     function getAllMentionItems(address account) external view returns (bytes32[] memory) {
         return accountMentionItemIds[account];
     }
 
     /**
-     * @dev Query a topic's itemIds.
+     * @dev Query an acount's mentions.
      * @param account Address of the account.
      * @param offset Index of the first itemId to retreive.
      * @param limit Maximum number of itemIds to retrieve.
      * @return The itemIds.
      */
     function getMentionItemsByQuery(address account, uint offset, uint limit) external view returns (bytes32[] memory itemIds) {
-        // Get topic itemIds.
+        // Get mention itemIds.
         bytes32[] storage mentionItemIds = accountMentionItemIds[account];
         // Check if offset is beyond the end of the array.
         if (offset >= mentionItemIds.length) {
@@ -110,18 +110,18 @@ contract MixItemMentions {
     }
 
     /**
-     * @dev Get the number of topics an item has.
+     * @dev Get the number of accounts an item has mentioned.
      * @param itemId itemId of the item.
-     * @return The number of topics.
+     * @return The number of accounts.
      */
     function getItemMentionCount(bytes32 itemId) external view returns (uint) {
         return itemIdMentionAccounts[itemId].length;
     }
 
     /**
-     * @dev Get the topics for an item.
+     * @dev Get the accounts an item has mentioned.
      * @param itemId itemId of the item.
-     * @return The topics.
+     * @return The accounts.
      */
     function getItemMentions(bytes32 itemId) external view returns (address[] memory) {
         return itemIdMentionAccounts[itemId];
