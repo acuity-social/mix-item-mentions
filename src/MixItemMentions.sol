@@ -42,13 +42,15 @@ contract MixItemMentions {
     function addItem(address account, MixItemStoreInterface itemStore, bytes32 nonce) external {
         // Get the itemId. Ensure it does not exist.
         bytes32 itemId = itemStore.getNewItemId(msg.sender, nonce);
+        // Get the mentioned accounts list.
+        address[] storage accounts = itemIdMentionAccounts[itemId];
         // Ensure the item does not have too many mentions.
-        require (itemIdMentionAccounts[itemId].length < 20, "Item cannot mention more than 20 accounts.");
+        require (accounts.length < 20, "Item cannot mention more than 20 accounts.");
         // Store mappings.
         accountMentionItemIds[account].push(itemId);
-        itemIdMentionAccounts[itemId].push(account);
+        accounts.push(account);
         // Log the event.
-        emit AddItem(account, itemId, accountMentionItemIds[account].length -1);
+        emit AddItem(account, itemId, accounts.length -1);
     }
 
     /**
